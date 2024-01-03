@@ -10,13 +10,20 @@ pub struct DiceInput{
 
 impl DiceInput{
     pub fn parse(input: &str) -> Result<DiceInput, Box<dyn Error>>{
-        let re = Regex::new(r"(\d+)d(\d+)(?: \+ (\d+))?").unwrap(); 
+        let re = Regex::new(r"(\d+)d(\d+)(?:\s*([-+])\s*(\d+))?").unwrap(); 
         match re.captures(input) {
             Some(caps) => {
                 let num_dice: i32 = caps.get(1).unwrap().as_str().parse::<i32>().unwrap();
                 let num_sides: i32 = caps.get(2).unwrap().as_str().parse::<i32>().unwrap();
-                let modifier: i32 = match caps.get(3) {
-                    Some(m) => m.as_str().parse::<i32>().unwrap(),
+                let modifier: i32 = match caps.get(4) {
+                    Some(m) => {
+                        let mod_val: i32 = m.as_str().parse::<i32>().unwrap();
+                        if caps.get(3).unwrap().as_str() == "-" {
+                            -mod_val
+                        } else {
+                            mod_val
+                        }
+                    },
                     None => 0
                 };
                 Ok(DiceInput::new(num_dice, num_sides, modifier))
@@ -62,6 +69,14 @@ mod tests {
         assert_eq!(result.num_dice, 2);
         assert_eq!(result.num_sides, 6);
         assert_eq!(result.modifier, 0);
+    }
+
+    #[test]
+    fn test_valid_input_negative_modifier(){
+        let result = DiceInput::parse("2d6 - 3").unwrap();
+        assert_eq!(result.num_dice, 2);
+        assert_eq!(result.num_sides, 6);
+        assert_eq!(result.modifier, -3);
     }
 
     #[test]
