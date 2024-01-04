@@ -2,14 +2,14 @@ use regex::Regex;
 use std::error::Error;
 use rand::Rng;
 
-pub struct DiceInput{
+pub struct DiceRoll{
     num_dice: i32,
     num_sides: i32,
     modifier: i32,
 }
 
-impl DiceInput{
-    pub fn parse(input: &str) -> Result<DiceInput, Box<dyn Error>>{
+impl DiceRoll{
+    pub fn parse_input(input: &str) -> Result<DiceRoll, Box<dyn Error>>{
         let re = Regex::new(r"(\d+)d(\d+)(?:\s*([-+])\s*(\d+))?").unwrap(); 
         match re.captures(input) {
             Some(caps) => {
@@ -26,7 +26,7 @@ impl DiceInput{
                     },
                     None => 0
                 };
-                Ok(DiceInput::new(num_dice, num_sides, modifier))
+                Ok(DiceRoll::new(num_dice, num_sides, modifier))
             },
             None => {
                 Err("Invalid input format".into())
@@ -34,8 +34,8 @@ impl DiceInput{
         }
     }
 
-    pub fn new(num_dice: i32, num_sides: i32, modifier: i32) -> DiceInput{
-        DiceInput{
+    pub fn new(num_dice: i32, num_sides: i32, modifier: i32) -> DiceRoll{
+        DiceRoll{
             num_dice,
             num_sides,
             modifier,
@@ -57,7 +57,7 @@ mod tests {
 
     #[test]
     fn test_valid_input_with_modifier(){
-        let result = DiceInput::parse("2d6 + 3").unwrap();
+        let result = DiceRoll::parse_input("2d6 + 3").unwrap();
         assert_eq!(result.num_dice, 2);
         assert_eq!(result.num_sides, 6);
         assert_eq!(result.modifier, 3);
@@ -65,7 +65,7 @@ mod tests {
 
     #[test]
     fn test_valid_input_without_modifier(){
-        let result = DiceInput::parse("2d6").unwrap();
+        let result = DiceRoll::parse_input("2d6").unwrap();
         assert_eq!(result.num_dice, 2);
         assert_eq!(result.num_sides, 6);
         assert_eq!(result.modifier, 0);
@@ -73,7 +73,7 @@ mod tests {
 
     #[test]
     fn test_valid_input_negative_modifier(){
-        let result = DiceInput::parse("2d6 - 3").unwrap();
+        let result = DiceRoll::parse_input("2d6 - 3").unwrap();
         assert_eq!(result.num_dice, 2);
         assert_eq!(result.num_sides, 6);
         assert_eq!(result.modifier, -3);
@@ -81,13 +81,13 @@ mod tests {
 
     #[test]
     fn test_invalid_input() {
-        let result = DiceInput::parse("1143");
+        let result = DiceRoll::parse_input("1143");
         assert!(result.is_err());
     }
 
     #[test]
     fn test_invalid_roll() {
-        let result = DiceInput::parse("-1dd6");
+        let result = DiceRoll::parse_input("-1dd6");
         assert!(result.is_err());
     }
 }
