@@ -84,4 +84,10 @@ mod tests {
         let result = DiceInput::parse("1143");
         assert!(result.is_err());
     }
+
+    #[test]
+    fn test_invalid_roll() {
+        let result = DiceInput::parse("-1dd6");
+        assert!(result.is_err());
+    }
 }
